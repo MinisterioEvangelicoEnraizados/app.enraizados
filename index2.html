@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ministério Evangélico Enraizados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Great+Vibes&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --o900:#1E2A08;--o800:#2C3F0D;--o700:#3D4A1A;--o600:#4E5F22;
+            --o500:#5C6B2E;--o400:#7A8C40;--o300:#9AAD5A;--o200:#BDD088;
+            --o100:#DEE9BB;--o50:#F2F7E8;
+            --g900:#C49A2A;--g800:#D4AB38;--g700:#E8C96A;
+            --black:#0F1409;--gray900:#1C1C1C;--gray800:#2C2C2C;
+            --gray500:#888;--white:#FDFCF8;
+            --red:#8B2A2A;--red-light:#D96060;
+            --r4:4px;--r6:6px;--r8:8px;--r10:10px;--r14:14px;--r20:20px;
+            --sh-sm:0 1px 4px rgba(0,0,0,.2);
+            --sh-md:0 4px 20px rgba(0,0,0,.3);
+            --sh-lg:0 12px 48px rgba(0,0,0,.45);
+            --sh-xl:0 24px 80px rgba(0,0,0,.65);
+            --t:.18s ease;
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+        }
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+        html,body{height:100%;overflow-x:hidden}
+        body{
+            font-family:'Inter',sans-serif;background:var(--o700);color:var(--white);
+            font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+        }
+        input,select,textarea,button{font-family:'Inter',sans-serif;font-size:16px}
+        button{cursor:pointer}
+
+        #toast{
+            position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);z-index:9999;
+            background:var(--o800);border:1px solid var(--o400);border-radius:var(--r8);
+            padding:10px 20px;box-shadow:var(--sh-lg);
+            font-size:13px;font-weight:500;color:var(--o200);
+            opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;
+            white-space:nowrap;display:flex;align-items:center;gap:8px;
+        }
+        #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+        .auth-screen{
+            min-height:100vh;display:flex;align-items:center;justify-content:center;
+            background:radial-gradient(ellipse at 40% 50%,var(--o800),var(--o900) 60%,#0A0F03);
+            padding:20px;
+        }
+        .auth-card{
+            background:linear-gradient(145deg,rgba(46,59,18,.95),rgba(20,20,20,.98));
+            border:1px solid rgba(196,154,42,.25);border-radius:var(--r20);
+            padding:40px 30px;width:100%;max-width:400px;box-shadow:var(--sh-xl);text-align:center;
+        }
+        .auth-logo{
+            width:90px;height:90px;border-radius:50%;border:3px solid rgba(196,154,42,.4);
+            background:linear-gradient(135deg,var(--o700),var(--o900));
+            display:flex;align-items:center;justify-content:center;
+            margin:0 auto 18px;font-size:36px;box-shadow:0 0 32px rgba(196,154,42,.12);overflow:hidden;
+        }
+        .auth-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+        h1{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--g900);letter-spacing:.6px;margin-bottom:4px}
+        .sub{font-size:10px;color:var(--o300);letter-spacing:3px;text-transform:uppercase;margin-bottom:28px}
+        .divider{height:1px;background:linear-gradient(to right,transparent,rgba(196,154,42,.3),transparent);margin-bottom:24px}
+        .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;text-align:left}
+        .field label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--g900);text-transform:uppercase}
+        .field input,.field select,.field textarea{
+            background:rgba(0,0,0,.35);border:1px solid rgba(92,107,46,.4);
+            border-radius:var(--r6);padding:13px 14px;color:var(--white);
+            outline:none;transition:border-color var(--t);width:100%;
+        }
+        .field input:focus,.field select:focus{border-color:rgba(196,154,42,.6);box-shadow:0 0 0 3px rgba(196,154,42,.08)}
+        .err{
+            background:rgba(139,42,42,.2);border:1px solid rgba(139,42,42,.5);
+            border-radius:var(--r6);padding:10px 14px;font-size:13px;color:var(--red-light);
+            margin-bottom:14px;display:none;align-items:center;gap:8px;text-align:left;
+        }
+        .err.show{display:flex}
+        .btn{
+            font-size:12px;font-weight:600;letter-spacing:.5px;
+            padding:10px 16px;border:none;border-radius:var(--r6);
+            display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+            transition:all var(--t);min-height:42px;justify-content:center;
+        }
+        .btn-gold{background:linear-gradient(135deg,var(--g900),var(--g700));color:var(--black)}
+        .btn-blue{background:linear-gradient(135deg,#1E5F7A,#2E8BAA);color:var(--white)}
+        .btn-teal{background:linear-gradient(135deg,#00897B,#26A69A);color:var(--white)}
+        .btn-purple{background:linear-gradient(135deg,#6A1B9A,#8E24AA);color:var(--white)}
+        .btn-green{background:linear-gradient(135deg,#2E7D32,#43A047);color:var(--white)}
+        .btn-ghost{background:transparent;border:1px solid rgba(92,107,46,.35);color:var(--o300)}
+        .btn-del{background:transparent;border:1px solid rgba(139,42,42,.3);color:var(--red-light);padding:8px 10px;font-size:11px;min-height:36px}
+
+        .topbar{
+            background:linear-gradient(to right,var(--black),var(--o800),var(--black));
+            border-bottom:1px solid rgba(196,154,42,.18);
+            padding:0 16px;display:flex;align-items:center;gap:12px;
+            min-height:64px;position:sticky;top:0;z-index:200;
+        }
+        .tb-logo{width:46px;height:46px;border-radius:50%;border:2px solid rgba(196,154,42,.35);overflow:hidden;cursor:pointer;background:linear-gradient(135deg,var(--o600),var(--o800));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .tb-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+        .tb-info{flex:1;min-width:0}
+        .tb-info h1{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .tb-info p{font-size:9px;color:var(--o300);letter-spacing:2px;text-transform:uppercase}
+        .tb-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+        .saldo-chip{background:rgba(0,0,0,.25);border:1px solid rgba(92,107,46,.3);border-radius:var(--r6);padding:5px 10px;text-align:right}
+        .saldo-chip .lbl{font-size:8px;font-weight:700;color:var(--o300);letter-spacing:2px;text-transform:uppercase;display:block}
+        .saldo-chip .val{font-family:'Cinzel',serif;font-size:13px;font-weight:700}
+        .tbtn{background:rgba(92,107,46,.15);border:1px solid rgba(92,107,46,.3);border-radius:var(--r6);padding:8px 12px;color:var(--o200);font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px}
+        .tbtn-link{background:rgba(90,140,200,.15);border-color:rgba(90,140,200,.3);color:#7EB8D4}
+        .tbtn-exit{background:rgba(139,42,42,.12);border-color:rgba(139,42,42,.3);color:var(--red-light)}
+
+        .layout{display:flex;flex:1;min-height:calc(100vh - 64px)}
+        .sidebar{width:200px;background:linear-gradient(to bottom,var(--o900),#0F1409);border-right:1px solid rgba(92,107,46,.2);padding:16px 0;display:flex;flex-direction:column}
+        @media(max-width:767px){.sidebar{display:none}}
+        .ssec{margin-bottom:6px}
+        .ssec-title{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(168,184,122,.3);padding:0 16px;margin-bottom:3px}
+        .snav{width:100%;background:transparent;border:none;border-left:3px solid transparent;padding:9px 16px;display:flex;align-items:center;gap:9px;color:var(--o300);font-size:12px;text-align:left;transition:all var(--t)}
+        .snav:hover{background:rgba(92,107,46,.1);color:var(--white)}
+        .snav.active{background:rgba(196,154,42,.07);color:var(--g900);border-left-color:var(--g900);font-weight:600}
+        .snav .si{font-size:14px;width:18px;text-align:center}
+        .snav .sl{flex:1}
+        .snav.culto{color:#FF9800}
+        .snav.culto.active{color:#FF9800;border-left-color:#FF9800;background:rgba(255,152,0,.08)}
+
+        .content{flex:1;padding:16px;min-width:0}
+        .panel{background:linear-gradient(145deg,rgba(36,48,14,.75),rgba(18,18,18,.85));border:1px solid rgba(92,107,46,.22);border-radius:var(--r10);overflow:hidden;box-shadow:var(--sh-md)}
+        .panel-head{background:linear-gradient(to right,rgba(15,20,5,.9),rgba(46,59,18,.6));border-bottom:1px solid rgba(196,154,42,.12);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+        .ptitle{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--g900)}
+        table{width:100%;border-collapse:collapse;font-size:13px}
+        th{font-size:9px;font-weight:700;letter-spacing:1.5px;color:rgba(196,154,42,.7);padding:10px 12px;text-align:left;text-transform:uppercase;border-bottom:1px solid rgba(196,154,42,.1);background:rgba(10,15,3,.8)}
+        td{padding:10px 12px;color:rgba(255,255,255,.82);border-bottom:1px solid rgba(92,107,46,.1)}
+        .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+        .bdg-d{background:rgba(92,107,46,.2);color:var(--o200);border:1px solid rgba(92,107,46,.28)}
+        .bdg-o{background:rgba(196,154,42,.14);color:var(--g700);border:1px solid rgba(196,154,42,.22)}
+        .bdg-de{background:rgba(139,42,42,.14);color:#E88080;border:1px solid rgba(139,42,42,.22)}
+        .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+        .modal{background:linear-gradient(145deg,#1E2A08,#1C1C1C);border:1px solid rgba(196,154,42,.18);border-radius:var(--r14);width:100%;max-width:500px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sh-xl)}
+        .modal-head{background:linear-gradient(to right,rgba(10,15,3,.9),rgba(36,48,14,.7));border-bottom:1px solid rgba(196,154,42,.12);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+        .modal-body{padding:18px 20px;overflow-y:auto;flex:1}
+        .modal-close{background:transparent;border:none;color:var(--o300);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:4px;line-height:1;transition:color var(--t)}
+        .modal-close:hover{color:var(--red-light)}
+        .fin-lock{text-align:center;padding:40px}
+        .link-box{background:rgba(0,0,0,.3);border:1px solid rgba(92,107,46,.28);border-radius:var(--r8);padding:14px;display:flex;gap:10px;align-items:center}
+        .link-box input{flex:1;background:transparent;border:none;color:var(--o200);font-family:monospace}
+
+        .verse-banner{
+            background:linear-gradient(135deg,rgba(36,48,14,.8),rgba(18,18,18,.9));
+            border:1px solid rgba(196,154,42,.3);border-radius:var(--r10);
+            padding:20px;margin-bottom:16px;text-align:center;
+            position:relative;overflow:hidden;
+        }
+        .verse-banner::before{
+            content:'';position:absolute;top:0;left:0;right:0;height:2px;
+            background:linear-gradient(to right,transparent,var(--g700),transparent);
+        }
+        .verse-banner .verse-text{
+            font-family:'Crimson Text',Georgia,serif;font-style:italic;
+            font-size:15px;color:var(--o100);line-height:1.8;margin-bottom:8px;
+        }
+        .verse-banner .verse-ref{
+            font-family:'Cinzel',serif;font-size:11px;color:var(--g700);letter-spacing:1px;font-weight:700;
+        }
+
+        .culto-banner{
+            background:linear-gradient(135deg,rgba(255,152,0,.15),rgba(255,87,34,.1));
+            border:2px solid rgba(255,152,0,.4);border-radius:var(--r10);
+            padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;
+            animation:pulse-border 2s ease-in-out infinite;
+        }
+        @keyframes pulse-border{0%,100%{border-color:rgba(255,152,0,.4)}50%{border-color:rgba(255,152,0,.8)}}
+        .culto-banner .culto-icon{font-size:32px}
+        .culto-banner .culto-info{flex:1}
+        .culto-banner .culto-info h3{font-family:'Cinzel',serif;color:#FF9800;font-size:14px;margin-bottom:4px}
+        .culto-banner .culto-info p{font-size:11px;color:var(--o300)}
+    </style>
+</head>
+<body>
+<div id="toast">💾 <span id="toast-msg"></span></div>
+<div id="app"></div>
+<script>
+// ---------- BANCO DE VERSÍCULOS ----------
+const VERSICULOS = [
+    { texto: "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna.", ref: "João 3:16" },
+    { texto: "Tudo posso naquele que me fortalece.", ref: "Filipenses 4:13" },
+    { texto: "O Senhor é o meu pastor; nada me faltará.", ref: "Salmos 23:1" },
+    { texto: "Entrega o teu caminho ao Senhor; confia nele, e ele tudo fará.", ref: "Salmos 37:5" },
+    { texto: "Porque eu bem sei os pensamentos que tenho a vosso respeito, diz o Senhor; pensamentos de paz, e não de mal, para vos dar o fim que esperais.", ref: "Jeremias 29:11" },
+    { texto: "Mas os que esperam no Senhor renovarão as suas forças; subirão com asas como águias; correrão, e não se cansarão; caminharão, e não se fatigarão.", ref: "Isaías 40:31" },
+    { texto: "O choro pode durar uma noite, mas a alegria vem pela manhã.", ref: "Salmos 30:5" },
+    { texto: "Não vos inquieteis, pois, pelo dia de amanhã, porque o dia de amanhã cuidará de si mesmo. Basta a cada dia o seu mal.", ref: "Mateus 6:34" },
+    { texto: "Agradeço ao meu Deus todas as vezes que me lembro de vós.", ref: "Filipenses 1:3" },
+    { texto: "Porque onde estiver o vosso tesouro, aí estará também o vosso coração.", ref: "Mateus 6:21" },
+    { texto: "Se Deus é por nós, quem será contra nós?", ref: "Romanos 8:31" },
+    { texto: "Em tudo dai graças, porque esta é a vontade de Deus em Cristo Jesus para convosco.", ref: "1 Tessalonicenses 5:18" },
+    { texto: "O Senhor te abençoe e te guarde; o Senhor faça resplandecer o seu rosto sobre ti e tenha misericórdia de ti; o Senhor sobre ti levante o seu rosto e te dê a paz.", ref: "Números 6:24-26" },
+    { texto: "Não to mandei eu? Esforça-te, e tem bom ânimo; não temas, nem te espantes; porque o Senhor teu Deus é contigo, por onde quer que andares.", ref: "Josué 1:9" },
+    { texto: "Lâmpada para os meus pés é tua palavra, e luz para o meu caminho.", ref: "Salmos 119:105" },
+    { texto: "Portanto, assim como vocês receberam Cristo Jesus, o Senhor, continuem a viver nele, enraizados e edificados nele, firmados na fé, como foram ensinados, transbordando de gratidão.", ref: "Colossenses 2:6-7" },
+    { texto: "Alegrai-vos sempre no Senhor; outra vez digo: alegrai-vos.", ref: "Filipenses 4:4" },
+    { texto: "Deus é o nosso refúgio e fortaleza, socorro bem presente na angústia.", ref: "Salmos 46:1" },
+    { texto: "Pedi, e dar-se-vos-á; buscai, e encontrareis; batei, e abrir-se-vos-á.", ref: "Mateus 7:7" },
+    { texto: "E conhecereis a verdade, e a verdade vos libertará.", ref: "João 8:32" }
+];
+
+// ---------- UTILITÁRIOS ----------
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CATS = ['Aluguel / Manutenção','Energia / Água','Som / Mídia','Material de Limpeza','Eventos / Cultos','Missões','Secretaria','Outros'];
+const CARGOS = ['Pastor','Evangelista','Diácono','Diaconisa','Presbítero','Líder de Louvor','Secretário(a)','Tesoureiro(a)','Outro'];
+const NOME_IGREJA = 'Ministério Evangélico Enraizados';
+const DIAS_CULTO = [3, 5, 0]; // quarta(3), sexta(5), domingo(0)
+
+function getHorarioCulto() {
+    const hoje = new Date();
+    const diaSemana = hoje.getDay();
+    return diaSemana === 0 ? '19:00' : '19:30';
+}
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const hoje = () => new Date().toISOString().split('T')[0];
+const brl = n => Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const ls = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+const ss = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const hashPin = p => { let h=0; for(let i=0;i<p.length;i++){ h=((h<<5)-h)+p.charCodeAt(i); h|=0; } return String(Math.abs(h)); };
+
+function getVersiculoDoDia() {
+    const hoje = new Date();
+    const diaDoAno = Math.floor((hoje - new Date(hoje.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+    const saved = ls('versiculo-do-dia');
+    if (saved && saved.data === hoje.toISOString().split('T')[0]) {
+        return saved.versiculo;
+    }
+    const index = diaDoAno % VERSICULOS.length;
+    const versiculo = VERSICULOS[index];
+    ss('versiculo-do-dia', { data: hoje.toISOString().split('T')[0], versiculo });
+    return versiculo;
+}
+
+function isDiaDeCulto() { const hoje = new Date(); return DIAS_CULTO.includes(hoje.getDay()); }
+function getNomeDiaCulto() { const d = new Date().getDay(); const nomes = {0:'domingo',3:'quarta-feira',5:'sexta-feira'}; return nomes[d] || ''; }
+
+// ---------- STATE ----------
+const ST = {
+    mode: 'login', loggedIn: false, tab: 'membros', finUnlocked: false,
+    logo: ls('igr-logo') || null,
+    membros: ls('igr-membros') || [],
+    congregados: ls('igr-congregados') || [],
+    obreiros: ls('igr-obreiros') || [],
+    entradas: ls('igr-entradas') || [],
+    dispensas: ls('igr-dispensas') || [],
+    search: { membros:'', congregados:'', obreiros:'', entradas:'', dispensas:'' },
+    filter: { entradas:'Todos', dispensas:'Todos' },
+    bdayMonth: new Date().getMonth(),
+    report: { tipo:'mensal', mes: new Date().getMonth(), ano: new Date().getFullYear() },
+    modal: null, cadastroSuccess: false
+};
+if (window.location.search.includes('cadastro=1')) ST.mode = 'cadastro';
+
+function autoSave(key, msg) { ss('igr-'+key, ST[key]); if (msg) toast(msg); }
+
+// ---------- RENDER ----------
+function render() {
+    const app = document.getElementById('app');
+    if (ST.mode === 'cadastro') { app.innerHTML = renderCadastroOnline(); return; }
+    if (!ST.loggedIn) {
+        app.innerHTML = renderLogin();
+        setTimeout(() => {
+            const lu = document.getElementById('l-u'), lp = document.getElementById('l-p');
+            if (lu) { lu.focus(); lu.addEventListener('keydown', e => e.key==='Enter' && doLogin()); }
+            if (lp) lp.addEventListener('keydown', e => e.key==='Enter' && doLogin());
+        }, 50);
+        return;
+    }
+
+    const tE = ST.entradas.reduce((s,r)=>s+Number(r.valor||0),0);
+    const tD = ST.dispensas.reduce((s,r)=>s+Number(r.valor||0),0);
+    const saldo = tE - tD;
+    const finLocked = ['entradas','dispensas','relatorios'].includes(ST.tab) && !ST.finUnlocked;
+    const versiculo = getVersiculoDoDia();
+    const horarioCulto = getHorarioCulto();
+
+    app.innerHTML = `
+        <div class="topbar">
+            <div class="tb-logo" onclick="document.getElementById('logo-file').click()">${ST.logo?`<img src="${ST.logo}" alt="Logo">`:'<span style="font-size:18px">✝</span>'}</div>
+            <input id="logo-file" type="file" accept="image/*" onchange="handleLogo(this)" style="display:none">
+            <div class="tb-info"><h1>${NOME_IGREJA}</h1><p>Sistema de Gestão</p></div>
+            <div class="tb-right">
+                <div class="saldo-chip"><span class="lbl">Saldo</span><span class="val" style="color:${saldo>=0?'#6FCF97':'#E88080'}">${brl(saldo)}</span></div>
+                <button class="tbtn tbtn-link" onclick="shareCadastroLink()">🔗</button>
+                <button class="tbtn" onclick="openSettings()">⚙</button>
+                <button class="tbtn tbtn-exit" onclick="confirmExit()">⏻</button>
+            </div>
+        </div>
+        <div class="layout">
+            <div class="sidebar">
+                <div class="ssec"><div class="ssec-title">Pessoas</div>
+                    ${snav('membros','✝','Membros',ST.membros.length)}
+                    ${snav('congregados','🕊','Congregados',ST.congregados.length)}
+                    ${snav('obreiros','⚓','Obreiros',ST.obreiros.length)}
+                </div>
+                <div class="ssec"><div class="ssec-title">Financeiro ${ST.finUnlocked?'🔓':'🔒'}</div>
+                    ${snav('entradas','📥','Entradas')}
+                    ${snav('dispensas','📤','Dispensas')}
+                    ${snav('relatorios','📊','Relatórios')}
+                </div>
+                ${isDiaDeCulto() ? `<div class="ssec"><div class="ssec-title">Hoje 🕐</div>
+                    ${snav('lembretes','📢','Lembretes de Culto','','',true)}
+                </div>` : ''}
+                <div class="ssec"><div class="ssec-title">Outros</div>
+                    ${snav('aniversarios','🎂','Aniversariantes')}
+                    ${snav('certificados','📜','Certificados')}
+                </div>
+                <div style="margin-top:auto;padding:14px 16px;border-top:1px solid rgba(92,107,46,.12);text-align:center;font-size:9px;color:rgba(168,184,122,.22)">✝ Enraizados em Cristo<br>Colossenses 2:7</div>
+            </div>
+            <div class="content">
+                ${isDiaDeCulto() ? renderCultoBanner(horarioCulto) : ''}
+                <div class="verse-banner">
+                    <div class="verse-text">"${versiculo.texto}"</div>
+                    <div class="verse-ref">📖 ${versiculo.ref}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+                    ${stat(ST.membros.length,'Membros')} ${stat(ST.congregados.length,'Congreg.')} ${stat(ST.obreiros.length,'Obreiros')}
+                    ${stat(brl(tE),'Entradas','#6FCF97')} ${stat(brl(tD),'Dispensas','#E88080')} ${stat(brl(saldo),'Saldo',saldo>=0?'#6FCF97':'#E88080')}
+                </div>
+                ${finLocked ? renderFinLock() : renderSection(horarioCulto)}
+            </div>
+        </div>
+        ${ST.modal ? renderModal() : ''}
+    `;
+
+    function snav(id,icon,label,badge,extra,isCulto) {
+        let cls = 'snav'; if (ST.tab===id) cls += ' active'; if (isCulto) cls += ' culto';
+        return `<button class="${cls}" onclick="setTab('${id}')"><span class="si">${icon}</span><span class="sl">${label}</span>${badge!==undefined?`<span style="background:var(--o600);color:var(--white);border-radius:10px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:auto">${badge}</span>`:''}</button>`;
+    }
+    function stat(v,l,c) {
+        return `<div style="background:linear-gradient(145deg,rgba(46,59,18,.6),rgba(20,20,20,.7));border:1px solid rgba(92,107,46,.22);border-radius:8px;padding:10px 12px"><span style="font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:${c||'var(--g900)'};display:block">${v}</span><span style="font-size:8px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--o400)">${l}</span></div>`;
+    }
+}
+
+function setTab(id) { ST.tab = id; render(); }
+function renderCultoBanner(horario) {
+    const diaNome = getNomeDiaCulto();
+    const todos = [...ST.membros, ...ST.congregados, ...ST.obreiros];
+    const fones = new Set(todos.filter(p=>p.telefone).map(p=>p.telefone));
+    return `<div class="culto-banner"><div class="culto-icon">📢</div><div class="culto-info"><h3>Hoje é dia de Culto! 🕊️</h3><p>${diaNome.charAt(0).toUpperCase()+diaNome.slice(1)} às ${horario}h — ${fones.size} contatos</p></div><button class="btn btn-green" onclick="setTab('lembretes')">Enviar Lembretes</button></div>`;
+}
+
+// ---------- LOGIN ----------
+function renderLogin() {
+    const versiculo = getVersiculoDoDia();
+    return `<div class="auth-screen"><div class="auth-card">
+        <div class="auth-logo">${ST.logo?`<img src="${ST.logo}">`:'✝'}</div>
+        <h1>${NOME_IGREJA}</h1><p class="sub">Sistema de Gestão</p>
+        <div style="background:rgba(196,154,42,.08);border:1px solid rgba(196,154,42,.2);border-radius:8px;padding:12px;margin-bottom:20px">
+            <p style="font-family:'Crimson Text',Georgia,serif;font-style:italic;font-size:13px;color:var(--o100);line-height:1.6">"${versiculo.texto}"</p>
+            <p style="font-family:'Cinzel',serif;font-size:10px;color:var(--g700);margin-top:6px;letter-spacing:1px">📖 ${versiculo.ref}</p>
+        </div>
+        <div class="divider"></div>
+        <div id="lerr" class="err"><span>⚠</span><span id="lerr-msg"></span></div>
+        <div class="field"><label>Usuário</label><input id="l-u" placeholder="Digite o usuário" autocomplete="username"></div>
+        <div class="field"><label>Senha</label><input id="l-p" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+        <button class="btn btn-gold" style="width:100%" onclick="doLogin()">ENTRAR</button>
+        <p style="font-size:11px;color:rgba(168,184,122,.3);margin-top:14px">Padrão: admin / 1234</p>
+    </div></div>`;
+}
+function doLogin() {
+    const u = document.getElementById('l-u')?.value.trim();
+    const p = document.getElementById('l-p')?.value;
+    const c = ls('igr-credentials') || { usuario:'admin', senha:'1234' };
+    if (u === c.usuario && p === c.senha) { ST.loggedIn = true; ST.mode = 'app'; render(); }
+    else { document.getElementById('lerr').classList.add('show'); document.getElementById('lerr-msg').textContent = 'Usuário ou senha incorretos.'; }
+}
+
+// ---------- CADASTRO ONLINE ----------
+function renderCadastroOnline() {
+    if (ST.cadastroSuccess) return `<div class="auth-screen"><div class="auth-card" style="text-align:center"><div style="font-size:60px">✅</div><h2 style="font-family:'Cinzel',serif;color:var(--g900);margin:10px 0">Cadastro Enviado!</h2><p style="color:var(--o300)">Seus dados foram enviados para a secretaria.</p></div></div>`;
+    return `<div class="auth-screen"><div class="auth-card" style="max-width:500px">
+        <div class="auth-logo">${ST.logo?`<img src="${ST.logo}">`:'✝'}</div><h1>${NOME_IGREJA}</h1><p class="sub">Cadastro de Membros</p>
+        <div id="cerr" class="err"><span>⚠</span><span id="cerr-msg"></span></div>
+        <div class="field"><label>Nome Completo *</label><input id="c-nome"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>Telefone</label><input id="c-tel"></div><div class="field"><label>E-mail</label><input id="c-email"></div></div>
+        <div class="field"><label>Data Nascimento</label><input type="date" id="c-dn"></div>
+        <div class="field"><label>Endereço</label><input id="c-end"></div>
+        <button class="btn btn-gold" style="width:100%" onclick="submitCadastro()">📝 Enviar Cadastro</button>
+    </div></div>`;
+}
+function submitCadastro() {
+    const nome = document.getElementById('c-nome')?.value.trim();
+    if (!nome) { document.getElementById('cerr').classList.add('show'); document.getElementById('cerr-msg').textContent='Nome obrigatório'; return; }
+    ST.membros.push({ id: uid(), nome, telefone: document.getElementById('c-tel')?.value||'', email: document.getElementById('c-email')?.value||'', dataNascimento: document.getElementById('c-dn')?.value||'', endereco: document.getElementById('c-end')?.value||'', dataIngresso: hoje(), status: 'Pendente' });
+    autoSave('membros', 'Cadastro recebido ✓'); ST.cadastroSuccess = true; render();
+}
+
+// ---------- LOGO ----------
+function handleLogo(input) { const f = input.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { ST.logo = e.target.result; autoSave('logo', 'Logo salvo ✓'); render(); }; r.readAsDataURL(f); }
+
+// ---------- COMPARTILHAR ----------
+function shareCadastroLink() { const link = window.location.origin + window.location.pathname + '?cadastro=1'; ST.modal = { type:'shareLink', linkUrl: link }; render(); }
+function copyShareLink() { document.getElementById('share-inp').select(); document.execCommand('copy'); toast('📋 Link copiado!'); }
+function shareWA() { window.open('https://wa.me/?text='+encodeURIComponent('Cadastre-se: '+window.location.origin+window.location.pathname+'?cadastro=1'),'_blank'); }
+function shareMail() { window.open('mailto:?subject=Cadastro&body='+encodeURIComponent('Cadastre-se: '+window.location.origin+window.location.pathname+'?cadastro=1'),'_blank'); }
+
+// ---------- LEMBRETES ----------
+function renderLembretes(horario) {
+    const diaNome = getNomeDiaCulto();
+    const todos = [...ST.membros, ...ST.congregados, ...ST.obreiros].filter(p=>p.telefone);
+    const unique = []; const phones = new Set();
+    for (const p of todos) { const tel = p.telefone.replace(/\D/g,''); if (!phones.has(tel)) { phones.add(tel); unique.push(p); } }
+    const mensagem = `🌟 Bom dia! Hoje é ${diaNome} e temos culto às ${horario}h no ${NOME_IGREJA}. Venha participar conosco! Que Deus abençoe o seu dia. 🙏✨`;
+    return `<div class="panel"><div class="panel-head"><span class="ptitle" style="color:#FF9800">📢 Lembretes de Culto — ${diaNome.charAt(0).toUpperCase()+diaNome.slice(1)} às ${horario}h</span></div>
+    <div style="padding:16px">
+        <div style="background:rgba(255,152,0,.1);border:1px solid rgba(255,152,0,.3);border-radius:8px;padding:14px;margin-bottom:16px"><p style="font-size:12px;color:var(--o200);margin-bottom:8px"><strong>📱 Mensagem que será enviada:</strong></p><p style="font-family:'Crimson Text',Georgia,serif;font-style:italic;font-size:13px;color:var(--o100);line-height:1.6">"${mensagem}"</p></div>
+        <p style="font-size:12px;color:var(--o300);margin-bottom:12px"><strong>${unique.length}</strong> contatos com telefone cadastrado:</p>
+        <div style="max-height:300px;overflow-y:auto;margin-bottom:16px">
+            ${unique.map(p => `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,.2);border-radius:6px;margin-bottom:4px"><span style="font-size:12px"><strong>${esc(p.nome)}</strong> — ${p.telefone}</span><button class="btn btn-green" style="min-height:32px;font-size:10px;padding:6px 10px" onclick="enviarWhatsAppIndividual('${p.telefone.replace(/\D/g,'')}')">📱 Enviar</button></div>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-green" style="flex:1;min-width:200px" onclick="enviarWhatsAppEmLote()">📱 Enviar para todos (${unique.length})</button></div>
+        <p style="font-size:10px;color:var(--o400);margin-top:8px;text-align:center">⚠️ Os links abrirão o WhatsApp Web/App. Envie um por um ou em lote.</p>
+    </div></div>`;
+}
+function enviarWhatsAppIndividual(telefone) {
+    const diaNome = getNomeDiaCulto(); const horario = getHorarioCulto();
+    const msg = encodeURIComponent(`🌟 Bom dia! Hoje é ${diaNome} e temos culto às ${horario}h no ${NOME_IGREJA}. Venha participar conosco! Que Deus abençoe o seu dia. 🙏✨`);
+    window.open(`https://wa.me/55${telefone}?text=${msg}`, '_blank');
+}
+function enviarWhatsAppEmLote() {
+    const diaNome = getNomeDiaCulto(); const horario = getHorarioCulto();
+    const todos = [...ST.membros, ...ST.congregados, ...ST.obreiros].filter(p=>p.telefone);
+    const phones = [...new Set(todos.map(p=>p.telefone.replace(/\D/g,'')))];
+    const msg = encodeURIComponent(`🌟 Bom dia! Hoje é ${diaNome} e temos culto às ${horario}h no ${NOME_IGREJA}. Venha participar conosco! Que Deus abençoe o seu dia. 🙏✨`);
+    phones.forEach((tel,i) => setTimeout(() => window.open(`https://wa.me/55${tel}?text=${msg}`, '_blank'), i*800));
+    toast(`📱 Abrindo ${phones.length} conversas no WhatsApp...`);
+}
+
+// ---------- FIN LOCK ----------
+function renderFinLock() {
+    return `<div class="fin-lock"><div style="font-size:50px">🔒</div><h3 style="font-family:'Cinzel',serif;color:var(--g900);margin:12px 0">Área Financeira Restrita</h3><p style="color:var(--o300);margin-bottom:18px">Digite o PIN financeiro para acessar.</p><div id="flerr" class="err"><span>⚠</span><span id="flerr-msg"></span></div><div class="field"><label>PIN</label><input id="fl-pin" type="password" maxlength="6" inputmode="numeric"></div><button class="btn btn-gold" style="width:100%" onclick="unlockFin()">🔓 Desbloquear</button><button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="setTab('membros')">← Voltar</button></div>`;
+}
+function unlockFin() {
+    const pin = document.getElementById('fl-pin')?.value;
+    const stored = ls('igr-finpin'); const expected = stored || hashPin('123456');
+    if (!pin || hashPin(pin) !== expected) { document.getElementById('flerr').classList.add('show'); document.getElementById('flerr-msg').textContent = 'PIN incorreto'; return; }
+    ST.finUnlocked = true; render();
+}
+
+// ---------- SEÇÕES ----------
+function renderSection(horarioCulto) {
+    switch(ST.tab) {
+        case 'membros': return renderPeople('membros');
+        case 'congregados': return renderPeople('congregados');
+        case 'obreiros': return renderPeople('obreiros');
+        case 'entradas': return renderEntradas();
+        case 'dispensas': return renderDispensas();
+        case 'aniversarios': return renderBirthdays();
+        case 'relatorios': return renderReports();
+        case 'certificados': return renderCertificados();
+        case 'lembretes': return renderLembretes(horarioCulto);
+        default: return '';
+    }
+}
+
+// ---------- PESSOAS ----------
+const pCfg = {
+    membros: { cols: ['Nome','Telefone','E-mail','Batizado','Status'], row: r=>[r.nome,r.telefone||'—',r.email||'—',r.batizado||'—',r.status||'Ativo'] },
+    congregados: { cols: ['Nome','Telefone','Desde'], row: r=>[r.nome,r.telefone||'—',r.dataInicio||'—'] },
+    obreiros: { cols: ['Nome','Cargo','Telefone'], row: r=>[r.nome,r.cargo||'—',r.telefone||'—'] }
+};
+const pFields = {
+    membros: [{k:'nome',l:'Nome',req:1},{k:'telefone',l:'Telefone'},{k:'email',l:'E-mail'},{k:'endereco',l:'Endereço'},{k:'dataNascimento',l:'Nasc.',t:'date'},{k:'dataIngresso',l:'Ingresso',t:'date'},{k:'batizado',l:'Batizado?',t:'sel',opts:['Sim','Não']},{k:'status',l:'Status',t:'sel',opts:['Ativo','Pendente','Inativo']}],
+    congregados: [{k:'nome',l:'Nome',req:1},{k:'telefone',l:'Telefone'},{k:'email',l:'E-mail'},{k:'endereco',l:'Endereço'},{k:'dataNascimento',l:'Nasc.',t:'date'},{k:'dataInicio',l:'Desde',t:'date'}],
+    obreiros: [{k:'nome',l:'Nome',req:1},{k:'cargo',l:'Cargo',t:'sel',opts:CARGOS},{k:'telefone',l:'Telefone'},{k:'email',l:'E-mail'},{k:'endereco',l:'Endereço'},{k:'dataNascimento',l:'Nasc.',t:'date'},{k:'dataOrdenacao',l:'Ordenação',t:'date'}]
+};
+
+function renderPeople(type) {
+    const cfg = pCfg[type], data = ST[type], srch = ST.search[type]||'';
+    const filtered = data.filter(r => Object.values(r).some(v => String(v||'').toLowerCase().includes(srch.toLowerCase())));
+    const rows = filtered.length===0 ? `<tr><td colspan="${cfg.cols.length+1}" style="text-align:center;color:var(--o400);padding:36px">Nenhum registro</td></tr>` : filtered.map(r => `<tr>${cfg.row(r).map(v => `<td>${v==='Pendente'?'<span class="badge bdg-o">⏳ Pendente</span>':esc(String(v))}</td>`).join('')}<td><button class="btn btn-ghost" onclick="openEdit('${type}','${r.id}')">✏</button><button class="btn btn-del" onclick="removeRec('${type}','${r.id}')">✕</button></td></tr>`).join('');
+    return `<div class="panel"><div class="panel-head"><span class="ptitle">${type==='membros'?'✝ Membros':type==='congregados'?'🕊 Congregados':'⚓ Obreiros'}</span><div style="display:flex;gap:8px"><input placeholder="Buscar…" value="${esc(srch)}" oninput="ST.search['${type}']=this.value;render()" style="background:rgba(0,0,0,.28);border:1px solid rgba(92,107,46,.28);border-radius:6px;padding:9px;color:var(--white);max-width:160px"><button class="btn btn-gold" onclick="openNew('${type}')">+ Novo</button></div></div><div style="overflow-x:auto"><table><thead><tr>${cfg.cols.map(c=>`<th>${c}</th>`).join('')}<th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function openNew(type) { ST.modal = { type:'person', entity:type, editing:null, form:{status:'Ativo'} }; render(); }
+function openEdit(type,id) { const r = ST[type].find(x=>x.id===id); if(!r) return; ST.modal = { type:'person', entity:type, editing:id, form:{...r} }; render(); }
+function removeRec(type,id) {
+    if (!confirm('Remover?')) return;
+    if (type==='obreiros') { const ob = ST.obreiros.find(r=>r.id===id); if (ob?.membroId && confirm('Remover também o membro correspondente?')) ST.membros = ST.membros.filter(m=>m.id!==ob.membroId); }
+    ST[type] = ST[type].filter(r=>r.id!==id); autoSave(type); if(type==='obreiros') autoSave('membros'); render();
+}
+function saveRec() {
+    const {entity,editing,form} = ST.modal;
+    if (!form.nome?.trim()) { alert('Nome obrigatório'); return; }
+    if (editing) {
+        ST[entity] = ST[entity].map(r=>r.id===editing?{...form,id:editing}:r);
+        if (entity==='obreiros') { const ob = ST.obreiros.find(r=>r.id===editing); if (ob?.membroId) ST.membros = ST.membros.map(m=>m.id===ob.membroId?{...m,nome:form.nome,telefone:form.telefone||'',email:form.email||'',endereco:form.endereco||'',dataNascimento:form.dataNascimento||'',observacoes:`Obreiro(a) - ${form.cargo||'—'}`}:m); }
+    } else {
+        const newId = uid();
+        if (entity==='obreiros') { const mId = uid(); ST.membros.push({id:mId,nome:form.nome,telefone:form.telefone||'',email:form.email||'',endereco:form.endereco||'',dataNascimento:form.dataNascimento||'',dataIngresso:hoje(),batizado:'—',observacoes:`Obreiro(a) - ${form.cargo||'—'}`}); ST.obreiros.push({...form,id:newId,membroId:mId}); autoSave('membros'); toast('✅ Obreiro cadastrado como membro!'); }
+        else ST[entity].push({...form,id:newId});
+    }
+    autoSave(entity); ST.modal = null; render();
+}
+
+// ---------- FINANCEIRO ----------
+function getAllPeople() {
+    const all = []; ST.membros.forEach(m => all.push({nome:m.nome,tipo:'Membro'})); ST.congregados.forEach(c => { if (!ST.membros.some(m=>m.nome===c.nome)) all.push({nome:c.nome,tipo:'Congregado'}); }); ST.obreiros.forEach(o => { if (!ST.membros.some(m=>m.nome===o.nome)) all.push({nome:o.nome,tipo:`Obreiro(a)`}); }); return all.sort((a,b)=>a.nome.localeCompare(b.nome));
+}
+function renderEntradas() {
+    const data = ST.entradas, flt = ST.filter.entradas, srch = ST.search.entradas||'';
+    const filtered = data.filter(r => (flt==='Todos'||r.tipo===flt) && Object.values(r).some(v=>String(v||'').toLowerCase().includes(srch)));
+    const tD = data.filter(r=>r.tipo==='Dízimo').reduce((s,r)=>s+Number(r.valor||0),0), tO = data.filter(r=>r.tipo==='Oferta').reduce((s,r)=>s+Number(r.valor||0),0);
+    const rows = filtered.length===0 ? '<tr><td colspan="5" style="text-align:center;color:var(--o400);padding:36px">Nenhum</td></tr>' : filtered.map(r=>`<tr><td>${r.data||'—'}</td><td><span class="badge ${r.tipo==='Dízimo'?'bdg-d':'bdg-o'}">${r.tipo}</span></td><td>${esc(r.membro||'—')}</td><td style="color:#6FCF97">${brl(r.valor)}</td><td><button class="btn btn-ghost" onclick="openEditE('${r.id}')">✏</button><button class="btn btn-del" onclick="removeRec('entradas','${r.id}')">✕</button></td></tr>`).join('');
+    return `<div class="panel"><div class="panel-head"><span class="ptitle">📥 Entradas</span><button class="btn btn-gold" onclick="openNewE()">+ Lançar</button></div><div style="display:flex;gap:4px;padding:10px">${['Todos','Dízimo','Oferta'].map(f=>`<button style="padding:6px 12px;border-radius:20px;font-size:11px;background:${flt===f?'var(--o500)':'transparent'};color:${flt===f?'white':'var(--o400)'};border:1px solid rgba(92,107,46,.22)" onclick="ST.filter.entradas='${f}';render()">${f}</button>`).join('')}</div><div style="padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div style="background:rgba(0,0,0,.22);padding:12px;text-align:center;border-radius:8px"><span style="color:#6FCF97;font-family:'Cinzel',serif;font-size:16px;font-weight:700;display:block">${brl(tD+tO)}</span><span style="font-size:9px;color:var(--o400)">Total</span></div><div style="background:rgba(0,0,0,.22);padding:12px;text-align:center;border-radius:8px"><span style="color:#7EB8D4;font-family:'Cinzel',serif;font-size:16px;font-weight:700;display:block">${brl(tD)}</span><span style="font-size:9px;color:var(--o400)">Dízimos</span></div><div style="background:rgba(0,0,0,.22);padding:12px;text-align:center;border-radius:8px"><span style="color:var(--g900);font-family:'Cinzel',serif;font-size:16px;font-weight:700;display:block">${brl(tO)}</span><span style="font-size:9px;color:var(--o400)">Ofertas</span></div></div><div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Tipo</th><th>Membro</th><th>Valor</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function openNewE() { ST.modal = { type:'entrada', editing:null, form:{tipo:'Dízimo',data:hoje()} }; render(); }
+function openEditE(id) { const r = ST.entradas.find(x=>x.id===id); if(!r) return; ST.modal = { type:'entrada', editing:id, form:{...r} }; render(); }
+function saveEntrada() { const {editing,form}=ST.modal; if(!form.valor||isNaN(form.valor)){alert('Valor inválido');return;} if(editing) ST.entradas=ST.entradas.map(r=>r.id===editing?{...form,id:editing}:r); else ST.entradas.push({...form,id:uid()}); autoSave('entradas'); ST.modal=null; render(); }
+function renderDispensas() {
+    const data = ST.dispensas, flt = ST.filter.dispensas, srch = ST.search.dispensas||'';
+    const filtered = data.filter(r => (flt==='Todos'||r.categoria===flt) && Object.values(r).some(v=>String(v||'').toLowerCase().includes(srch)));
+    const total = data.reduce((s,r)=>s+Number(r.valor||0),0);
+    const rows = filtered.length===0 ? '<tr><td colspan="5" style="text-align:center;color:var(--o400);padding:36px">Nenhum</td></tr>' : filtered.map(r=>`<tr><td>${r.data||'—'}</td><td><span class="badge bdg-de">${esc(r.categoria||'—')}</span></td><td>${esc(r.descricao||'—')}</td><td style="color:#E88080">${brl(r.valor)}</td><td><button class="btn btn-ghost" onclick="openEditD('${r.id}')">✏</button><button class="btn btn-del" onclick="removeRec('dispensas','${r.id}')">✕</button></td></tr>`).join('');
+    return `<div class="panel"><div class="panel-head"><span class="ptitle">📤 Dispensas</span><button class="btn btn-gold" onclick="openNewD()">+ Lançar</button></div><div style="display:flex;gap:4px;padding:10px;flex-wrap:wrap">${['Todos',...CATS].map(f=>`<button style="padding:6px 12px;border-radius:20px;font-size:10px;background:${flt===f?'var(--o500)':'transparent'};color:${flt===f?'white':'var(--o400)'};border:1px solid rgba(92,107,46,.22)" onclick="ST.filter.dispensas='${esc(f)}';render()">${f}</button>`).join('')}</div><div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="background:rgba(0,0,0,.22);padding:12px;text-align:center;border-radius:8px"><span style="color:#E88080;font-family:'Cinzel',serif;font-size:16px;font-weight:700;display:block">${brl(total)}</span><span style="font-size:9px;color:var(--o400)">Total</span></div><div style="background:rgba(0,0,0,.22);padding:12px;text-align:center;border-radius:8px"><span style="color:var(--gray500);font-family:'Cinzel',serif;font-size:16px;font-weight:700;display:block">${data.length}</span><span style="font-size:9px;color:var(--o400)">Lançamentos</span></div></div><div style="overflow-x:auto"><table><thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function openNewD() { ST.modal = { type:'dispensa', editing:null, form:{data:hoje()} }; render(); }
+function openEditD(id) { const r = ST.dispensas.find(x=>x.id===id); if(!r) return; ST.modal = { type:'dispensa', editing:id, form:{...r} }; render(); }
+function saveDispensa() { const {editing,form}=ST.modal; if(!form.valor||isNaN(form.valor)){alert('Valor inválido');return;} if(editing) ST.dispensas=ST.dispensas.map(r=>r.id===editing?{...form,id:editing}:r); else ST.dispensas.push({...form,id:uid()}); autoSave('dispensas'); ST.modal=null; render(); }
+
+// ---------- ANIVERSARIANTES ----------
+function renderBirthdays() {
+    const m = ST.bdayMonth, today = new Date();
+    const all = [...ST.membros.map(r=>({...r,_t:'Membro'})), ...ST.congregados.map(r=>({...r,_t:'Congregado'})), ...ST.obreiros.map(r=>({...r,_t:'Obreiro'}))];
+    const inM = all.filter(r => r.dataNascimento && parseInt(r.dataNascimento.split('-')[1],10)-1 === m).sort((a,b)=>parseInt(a.dataNascimento.split('-')[2],10)-parseInt(b.dataNascimento.split('-')[2],10));
+    const isToday = r => { const [,mo,dd]=r.dataNascimento.split('-'); return parseInt(mo,10)-1===today.getMonth() && parseInt(dd,10)===today.getDate(); };
+    return `<div class="panel"><div class="panel-head"><span class="ptitle" style="color:#F9A825">🎂 Aniversariantes</span></div><div style="display:flex;gap:5px;padding:12px;overflow-x:auto">${MONTHS.map((mn,i)=>`<button style="padding:7px 13px;border-radius:20px;font-size:11px;background:${m===i?'linear-gradient(135deg,#F9A825,#FFD54F)':'transparent'};color:${m===i?'black':'var(--o400)'};border:1px solid rgba(92,107,46,.22)" onclick="ST.bdayMonth=${i};render()">${mn.slice(0,3)}</button>`).join('')}</div><div style="padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">${inM.length===0?`<div style="text-align:center;color:var(--o400);padding:40px">Nenhum aniversariante em ${MONTHS[m]}</div>`:inM.map(r=>`<div style="background:linear-gradient(145deg,rgba(36,48,14,.6),rgba(18,18,18,.8));border:1px solid rgba(249,168,37,.18);border-radius:8px;padding:14px;text-align:center"><div style="width:40px;height:40px;border-radius:50%;background:var(--o500);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-family:'Cinzel',serif;color:var(--g700);border:2px solid rgba(249,168,37,.45)">${(r.nome||'').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase()}</div><div style="font-family:'Cinzel',serif;font-size:11px;color:white">${esc(r.nome)}${isToday(r)?'<span style="background:#F9A825;color:black;font-size:8px;padding:2px 5px;border-radius:5px;margin-left:4px">HOJE</span>':''}</div><div style="font-size:11px;color:#F9A825">🎂 ${parseInt(r.dataNascimento.split('-')[2],10)} de ${MONTHS[m]}</div><div style="font-size:9px;color:var(--o400);text-transform:uppercase;letter-spacing:1px">${esc(r.cargo||r._t)}</div></div>`).join('')}</div></div>`;
+}
+
+// ---------- CERTIFICADOS ----------
+function renderCertificados() {
+    return `<div class="panel"><div class="panel-head"><span class="ptitle">📜 Certificados</span></div><div style="padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+    <div style="background:rgba(0,0,0,.22);border:1px solid rgba(92,107,46,.2);border-radius:10px;padding:20px;text-align:center;cursor:pointer" onclick="openCertificado('batismo')"><div style="font-size:40px">💧</div><h3 style="font-family:'Cinzel',serif;color:var(--g900)">Certificado de Batismo</h3><button class="btn btn-blue" style="width:100%;margin-top:12px" onclick="event.stopPropagation();openCertificado('batismo')">🖨 Gerar</button></div>
+    <div style="background:rgba(0,0,0,.22);border:1px solid rgba(92,107,46,.2);border-radius:10px;padding:20px;text-align:center;cursor:pointer" onclick="openCertificado('apresentacao')"><div style="font-size:40px">👶</div><h3 style="font-family:'Cinzel',serif;color:var(--g900)">Certificado de Apresentação</h3><button class="btn btn-purple" style="width:100%;margin-top:12px" onclick="event.stopPropagation();openCertificado('apresentacao')">🖨 Gerar</button></div>
+    </div></div>`;
+}
+function openCertificado(tipo) { ST.modal = { type:'certificado', certTipo:tipo, form:{ nome:'', dataEvento:hoje(), pastor:'', igreja:NOME_IGREJA, local:'', ...(tipo==='batismo'?{dataNascimento:'',batizadoPor:'',testemunhas:''}:{nomePai:'',nomeMae:'',dataNascimentoCrianca:'',apresentadoPor:''}) }}; render(); }
+function gerarCertificado(tipo) {
+    const f = ST.modal.form; if (!f.nome?.trim()) { alert('Nome obrigatório'); return; } if (!f.dataEvento) { alert('Data obrigatória'); return; }
+    const isB = tipo==='batismo';
+    const logoTag = ST.logo?`<img src="${ST.logo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover">`:`<div style="width:80px;height:80px;border-radius:50%;background:#3D4A1A;display:flex;align-items:center;justify-content:center;font-size:40px;color:#C49A2A">✝</div>`;
+    const dataFmt = new Date(f.dataEvento+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+    const v = isB?{t:'"Portanto, fomos sepultados com ele na morte por meio do batismo..."',r:'Romanos 6:4'}:{t:'"Deixem vir a mim as crianças..."',r:'Mateus 19:14'};
+    const texto = isB?`Certificamos que <strong>${esc(f.nome)}</strong> foi batizado(a) no dia <strong>${dataFmt}</strong>.`:`Certificamos que <strong>${esc(f.nome)}</strong> foi apresentado(a) ao Senhor no dia <strong>${dataFmt}</strong>.`;
+    const w = window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Certificado</title><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet"><style>body{background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Crimson Text',serif}.cert{width:297mm;max-width:100%;min-height:210mm;border:6px double #3D4A1A;padding:40px;position:relative;background:#fdfcf8;text-align:center}h2{font-family:'Great Vibes',cursive;font-size:42px;color:#C49A2A;margin:20px 0}p{font-size:15px;line-height:2;margin:15px 30px;text-align:justify}.verse{font-style:italic;color:#5C6B2E;margin:20px 40px;padding:15px;border-top:1px solid rgba(61,74,26,.2);border-bottom:1px solid rgba(61,74,26,.2)}.sig{display:flex;justify-content:space-around;margin-top:30px}.sig-line{border-top:1px solid #3D4A1A;width:200px;margin:0 auto 5px}.footer{margin-top:30px;font-size:10px;color:#999}@media print{@page{size:A4 landscape;margin:0}}</style></head><body><div class="cert"><div style="margin-bottom:20px">${logoTag}</div><h2>${isB?'Certificado de Batismo':'Certificado de Apresentação'}</h2><p>${texto}</p><div class="verse">${v.t}<br><strong>${v.r}</strong></div><div class="sig"><div><div class="sig-line"></div><div style="font-family:'Great Vibes',cursive;font-size:22px">${esc(f.pastor||'_________________')}</div><small>Pastor(a)</small></div></div><div class="footer">${esc(f.local||'')} — ${dataFmt}<br>"Enraizados em Cristo"</div></div><script>window.onload=function(){window.print()}<\/script></body></html>`);
+    w.document.close();
+}
+
+// ---------- RELATÓRIOS (COM PDF CORRIGIDO) ----------
+function renderReports() {
+    const {tipo,mes,ano} = ST.report;
+    const ents = ST.entradas.filter(r => r.data && (tipo==='geral'?true:tipo==='anual'?parseInt(r.data.split('-')[0])===ano:new Date(r.data).getMonth()===mes&&new Date(r.data).getFullYear()===ano));
+    const disps = ST.dispensas.filter(r => r.data && (tipo==='geral'?true:tipo==='anual'?parseInt(r.data.split('-')[0])===ano:new Date(r.data).getMonth()===mes&&new Date(r.data).getFullYear()===ano));
+    const tE = ents.reduce((s,r)=>s+Number(r.valor||0),0), tD = disps.reduce((s,r)=>s+Number(r.valor||0),0);
+    const periodo = tipo==='mensal'?`${MONTHS[mes]} / ${ano}`:tipo==='anual'?`Ano ${ano}`:'Geral (todos os períodos)';
+    return `<div class="panel"><div class="panel-head"><span class="ptitle">📊 Relatórios</span><button class="btn btn-gold" onclick="gerarRelatorioPDF()">🖨 Imprimir PDF</button></div>
+        <div style="padding:14px;display:flex;gap:10px;flex-wrap:wrap">
+            <select onchange="ST.report.tipo=this.value;render()"><option value="mensal" ${tipo==='mensal'?'selected':''}>Mensal</option><option value="anual" ${tipo==='anual'?'selected':''}>Anual</option><option value="geral" ${tipo==='geral'?'selected':''}>Geral</option></select>
+            <select onchange="ST.report.ano=Number(this.value);render()">${[2024,2025,2026].map(a=>`<option ${ano===a?'selected':''}>${a}</option>`)}</select>
+            ${tipo==='mensal'?`<select onchange="ST.report.mes=Number(this.value);render()">${MONTHS.map((m,i)=>`<option value="${i}" ${mes===i?'selected':''}>${m}</option>`)}</select>`:''}
+        </div>
+        <div style="padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <div style="background:rgba(0,0,0,.22);padding:12px;text-align:center;border-radius:8px"><span style="color:#7EB8D4;font-family:'Cinzel',serif;font-size:16px;font-weight:700;display:block">${brl(tE)}</span><span style="font-size:9px;color:var(--o400)">Entradas</span></div>
+            <div style="background:rgba(0,0,0,.22);padding:12px;text-align:center;border-radius:8px"><span style="color:#E88080;font-family:'Cinzel',serif;font-size:16px;font-weight:700;display:block">${brl(tD)}</span><span style="font-size:9px;color:var(--o400)">Dispensas</span></div>
+            <div style="background:rgba(0,0,0,.22);padding:12px;text-align:center;border-radius:8px"><span style="color:${tE-tD>=0?'#6FCF97':'#E88080'};font-family:'Cinzel',serif;font-size:16px;font-weight:700;display:block">${brl(tE-tD)}</span><span style="font-size:9px;color:var(--o400)">Saldo</span></div>
+        </div>
+        </div>`;
+}
+
+// FUNÇÃO DE PDF CORRIGIDA E COMPLETA
+function gerarRelatorioPDF() {
+    const {tipo, mes, ano} = ST.report;
+    const ents = ST.entradas.filter(r => r.data && (tipo==='geral'?true:tipo==='anual'?parseInt(r.data.split('-')[0])===ano:new Date(r.data).getMonth()===mes&&new Date(r.data).getFullYear()===ano));
+    const disps = ST.dispensas.filter(r => r.data && (tipo==='geral'?true:tipo==='anual'?parseInt(r.data.split('-')[0])===ano:new Date(r.data).getMonth()===mes&&new Date(r.data).getFullYear()===ano));
+    const tE = ents.reduce((s,r)=>s+Number(r.valor||0),0);
+    const tD = disps.reduce((s,r)=>s+Number(r.valor||0),0);
+    const saldo = tE - tD;
+    const periodo = tipo==='mensal'?`${MONTHS[mes]} / ${ano}`:tipo==='anual'?`Ano ${ano}`:'Geral — Todos os Períodos';
+    const dataEmissao = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+    const logoTag = ST.logo
+        ? `<img src="${ST.logo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #C49A2A">`
+        : `<div style="width:80px;height:80px;border-radius:50%;background:#3D4A1A;display:flex;align-items:center;justify-content:center;font-size:40px;color:#C49A2A;border:3px solid #C49A2A">✝</div>`;
+
+    const rowsEnt = ents.length===0
+        ? `<tr><td colspan="4" style="text-align:center;color:#888;padding:16px;font-style:italic">Nenhuma entrada no período</td></tr>`
+        : ents.sort((a,b)=>a.data>b.data?1:-1).map((r,i)=>`<tr style="background:${i%2===0?'#f9f9f7':'#fff'}"><td>${r.data||'—'}</td><td><span style="background:${r.tipo==='Dízimo'?'#e8f0d4':'#fef3d0'};color:${r.tipo==='Dízimo'?'#3D4A1A':'#7A5C00'};padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">${r.tipo}</span></td><td>${esc(r.membro||'—')}</td><td style="text-align:right;color:#2E7D32;font-weight:600">${brl(r.valor)}</td></tr>`).join('');
+
+    const rowsDisp = disps.length===0
+        ? `<tr><td colspan="4" style="text-align:center;color:#888;padding:16px;font-style:italic">Nenhuma dispensa no período</td></tr>`
+        : disps.sort((a,b)=>a.data>b.data?1:-1).map((r,i)=>`<tr style="background:${i%2===0?'#f9f9f7':'#fff'}"><td>${r.data||'—'}</td><td><span style="background:#fde8e8;color:#8B2A2A;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700">${esc(r.categoria||'—')}</span></td><td>${esc(r.descricao||'—')}</td><td style="text-align:right;color:#C62828;font-weight:600">${brl(r.valor)}</td></tr>`).join('');
+
+    const html = `<!DOCTYPE html><html lang="pt-BR"><head>
+<meta charset="UTF-8"><title>Relatório Financeiro — ${periodo}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;font-size:12px;color:#222;background:#fff;padding:30px}
+.header{display:flex;align-items:center;gap:20px;padding-bottom:18px;border-bottom:3px solid #3D4A1A;margin-bottom:24px}
+.header-text h1{font-family:'Cinzel',serif;font-size:20px;color:#3D4A1A;font-weight:700}
+.header-text p{font-size:11px;color:#777;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.periodo-badge{background:#3D4A1A;color:#E8C96A;font-family:'Cinzel',serif;font-size:13px;padding:6px 16px;border-radius:20px;margin-top:8px;display:inline-block}
+.emissao{margin-left:auto;text-align:right;font-size:11px;color:#888}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.card{border-radius:8px;padding:14px;text-align:center}
+.card-ent{background:#e8f5e9;border:1px solid #a5d6a7}
+.card-disp{background:#ffebee;border:1px solid #ef9a9a}
+.card-saldo{border:2px solid}
+.card-saldo.pos{background:#e8f5e9;border-color:#388E3C}
+.card-saldo.neg{background:#ffebee;border-color:#C62828}
+.card .label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:4px}
+.card .value{font-family:'Cinzel',serif;font-size:18px;font-weight:700}
+.card-ent .value{color:#2E7D32}
+.card-disp .value{color:#C62828}
+.card-saldo.pos .value{color:#2E7D32}
+.card-saldo.neg .value{color:#C62828}
+.section-title{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:#3D4A1A;padding:10px 0 6px;border-bottom:1px solid #ddd;margin-bottom:0;display:flex;align-items:center;gap:8px}
+table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:12px}
+th{background:#3D4A1A;color:#E8C96A;padding:8px 10px;text-align:left;font-size:10px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+th:last-child,td:last-child{text-align:right}
+td{padding:7px 10px;border-bottom:1px solid #eee;vertical-align:middle}
+.total-row td{background:#f0f4e8;font-weight:700;font-size:13px;border-top:2px solid #3D4A1A}
+.saldo-box{border-radius:8px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.saldo-pos{background:#e8f5e9;border:2px solid #388E3C}
+.saldo-neg{background:#ffebee;border:2px solid #C62828}
+.saldo-box .label{font-family:'Cinzel',serif;font-size:14px;color:#3D4A1A;font-weight:700}
+.saldo-box .value{font-family:'Cinzel',serif;font-size:22px;font-weight:700}
+.saldo-pos .value{color:#2E7D32}
+.saldo-neg .value{color:#C62828}
+.footer{margin-top:30px;padding-top:12px;border-top:1px solid #ddd;text-align:center;font-size:10px;color:#aaa;font-style:italic}
+@media print{@page{size:A4 portrait;margin:15mm}body{padding:0}}
+</style></head>
+<body>
+<div class="header">
+    ${logoTag}
+    <div class="header-text">
+        <h1>${NOME_IGREJA}</h1>
+        <p>Relatório Financeiro</p>
+        <div class="periodo-badge">📊 ${periodo}</div>
+    </div>
+    <div class="emissao">Emitido em<br><strong>${dataEmissao}</strong></div>
+</div>
+<div class="cards">
+    <div class="card card-ent"><div class="label">Total de Entradas</div><div class="value">${brl(tE)}</div></div>
+    <div class="card card-disp"><div class="label">Total de Dispensas</div><div class="value">${brl(tD)}</div></div>
+    <div class="card card-saldo ${saldo>=0?'pos':'neg'}"><div class="label">Saldo do Período</div><div class="value">${brl(saldo)}</div></div>
+</div>
+<div class="section-title">📥 Entradas (${ents.length} registros)</div>
+<table><thead><tr><th>Data</th><th>Tipo</th><th>Membro</th><th style="text-align:right">Valor</th></tr></thead><tbody>
+${rowsEnt}
+<tr class="total-row"><td colspan="3">TOTAL DE ENTRADAS</td><td style="text-align:right;color:#2E7D32">${brl(tE)}</td></tr>
+</tbody></table>
+<div class="section-title">📤 Dispensas (${disps.length} registros)</div>
+<table><thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th style="text-align:right">Valor</th></tr></thead><tbody>
+${rowsDisp}
+<tr class="total-row"><td colspan="3">TOTAL DE DISPENSAS</td><td style="text-align:right;color:#C62828">${brl(tD)}</td></tr>
+</tbody></table>
+<div class="saldo-box ${saldo>=0?'saldo-pos':'saldo-neg'}">
+    <span class="label">SALDO FINAL — ${periodo.toUpperCase()}</span>
+    <span class="value">${brl(saldo)}</span>
+</div>
+<div class="footer">
+    ✝ ${NOME_IGREJA}<br>
+    "Enraizados em Cristo" — Colossenses 2:7<br>
+    Documento gerado em ${dataEmissao}
+</div>
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`;
+
+    const w = window.open('','_blank');
+    if (w) { w.document.write(html); w.document.close(); }
+    else { alert('Por favor, permita pop-ups para gerar o relatório.'); }
+}
+
+// ---------- MODAIS ----------
+function renderModal() {
+    const m = ST.modal;
+    if (m.type==='shareLink') {
+        return `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><h2>🔗 Compartilhar</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><p style="color:var(--o300);margin-bottom:12px">Link para cadastro online:</p><div class="link-box"><input id="share-inp" value="${esc(m.linkUrl)}" readonly><button class="btn btn-teal" onclick="copyShareLink()">📋 Copiar</button></div><div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-blue" onclick="shareWA()">WhatsApp</button><button class="btn btn-ghost" onclick="shareMail()">E-mail</button></div></div></div></div>`;
+    }
+    if (m.type==='person') return renderPersonModal();
+    if (m.type==='entrada'||m.type==='dispensa') return renderFinModal();
+    if (m.type==='certificado') return renderCertModal();
+    if (m.type==='settings') return renderSettingsModal();
+    return '';
+}
+function closeModal() { ST.modal = null; render(); }
+function renderPersonModal() {
+    const {entity,editing,form} = ST.modal; const fields = pFields[entity];
+    return `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><h2>${editing?'Editar':'Novo'} ${entity}</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div style="display:grid;gap:12px">${fields.map(f=>`<div class="field"><label>${f.l}${f.req?' *':''}</label>${f.t==='sel'?`<select onchange="sf('${f.k}',this.value)">${f.opts.map(o=>`<option ${form[f.k]===o?'selected':''}>${o}</option>`)}</select>`:f.t==='date'?`<input type="date" value="${form[f.k]||''}" onchange="sf('${f.k}',this.value)">`:`<input value="${esc(form[f.k]||'')}" onchange="sf('${f.k}',this.value)">`}</div>`).join('')}</div>${entity==='obreiros'?'<p style="color:var(--g900);font-size:11px;margin-top:12px">💡 Será cadastrado como membro automaticamente.</p>':''}<div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-gold" onclick="saveRec()">Salvar</button></div></div></div></div>`;
+}
+function renderFinModal() {
+    const {type,editing,form} = ST.modal; const isE = type==='entrada'; const people = getAllPeople();
+    return `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><h2>${editing?'Editar':'Novo'} ${isE?'Entrada':'Dispensa'}</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div style="display:grid;gap:12px">${isE?`<div class="field"><label>Tipo</label><select onchange="sf('tipo',this.value)"><option ${form.tipo==='Dízimo'||!form.tipo?'selected':''}>Dízimo</option><option ${form.tipo==='Oferta'?'selected':''}>Oferta</option></select></div><div class="field"><label>Pessoa</label><select onchange="sf('membro',this.value)">${people.map(p=>`<option ${form.membro===p.nome+' ('+p.tipo+')'?'selected':''}>${p.nome} (${p.tipo})</option>`)}</select></div>`:`<div class="field"><label>Categoria</label><select onchange="sf('categoria',this.value)">${CATS.map(c=>`<option>${c}</option>`)}</select></div><div class="field"><label>Descrição</label><input value="${esc(form.descricao||'')}" onchange="sf('descricao',this.value)"></div>`}<div class="field"><label>Data</label><input type="date" value="${form.data||''}" onchange="sf('data',this.value)"></div><div class="field"><label>Valor (R$)</label><input type="number" step="0.01" value="${form.valor||''}" onchange="sf('valor',this.value)"></div></div><div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-gold" onclick="${isE?'saveEntrada':'saveDispensa'}()">Salvar</button></div></div></div></div>`;
+}
+function renderCertModal() {
+    const {form,certTipo} = ST.modal; const isB = certTipo==='batismo';
+    return `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><h2>📜 ${isB?'Batismo':'Apresentação'}</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body"><div style="display:grid;gap:12px"><div class="field"><label>Nome *</label><input value="${esc(form.nome||'')}" onchange="sf('nome',this.value)"></div>${isB?`<div class="field"><label>Nascimento</label><input type="date" value="${form.dataNascimento||''}" onchange="sf('dataNascimento',this.value)"></div>`:`<div class="field"><label>Nasc. Criança</label><input type="date" value="${form.dataNascimentoCrianca||''}" onchange="sf('dataNascimentoCrianca',this.value)"></div><div class="field"><label>Pai</label><input value="${esc(form.nomePai||'')}" onchange="sf('nomePai',this.value)"></div><div class="field"><label>Mãe</label><input value="${esc(form.nomeMae||'')}" onchange="sf('nomeMae',this.value)"></div>`}<div class="field"><label>Data Evento *</label><input type="date" value="${form.dataEvento||''}" onchange="sf('dataEvento',this.value)"></div><div class="field"><label>Pastor</label><input value="${esc(form.pastor||'')}" onchange="sf('pastor',this.value)"></div><div class="field"><label>Local</label><input value="${esc(form.local||'')}" onchange="sf('local',this.value)"></div></div><div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end"><button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn ${isB?'btn-blue':'btn-purple'}" onclick="gerarCertificado('${certTipo}')">🖨 Gerar PDF</button></div></div></div></div>`;
+}
+function renderSettingsModal() {
+    const c = ls('igr-credentials') || { usuario:'admin', senha:'1234' };
+    return `<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal"><div class="modal-head"><h2>⚙ Configurações</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body">
+        <div style="margin-bottom:20px"><h3 style="font-family:'Cinzel',serif;color:var(--g900);font-size:11px;margin-bottom:8px">LOGO</h3><div onclick="document.getElementById('sett-logo').click()" style="border:2px dashed rgba(92,107,46,.35);border-radius:8px;padding:20px;text-align:center;cursor:pointer">${ST.logo?`<img src="${ST.logo}" style="width:72px;height:72px;border-radius:50%;object-fit:cover">`:'<div style="font-size:40px;opacity:.3">🖼</div>'}</div><input id="sett-logo" type="file" accept="image/*" style="display:none" onchange="handleLogoSett(this)"></div>
+        <div style="margin-bottom:20px"><h3 style="font-family:'Cinzel',serif;color:var(--g900);font-size:11px;margin-bottom:8px">CREDENCIAIS</h3><div class="field"><label>Usuário</label><input id="s-u" value="${esc(c.usuario)}"></div><div class="field"><label>Nova Senha</label><input type="password" id="s-p" placeholder="Manter"></div><div class="field"><label>Confirmar</label><input type="password" id="s-c" placeholder="Repetir"></div><button class="btn btn-gold" onclick="saveSettings()">💾 Salvar</button></div>
+        <div><h3 style="font-family:'Cinzel',serif;color:var(--g900);font-size:11px;margin-bottom:8px">PIN FINANCEIRO</h3><div class="field"><label>Novo PIN</label><input type="password" id="s-finpin" maxlength="6" placeholder="Manter"></div><div class="field"><label>Confirmar PIN</label><input type="password" id="s-finpinc" maxlength="6"></div><button class="btn btn-teal" onclick="saveFinPin()">🔒 Salvar PIN</button></div>
+    </div></div></div>`;
+}
+function openSettings() { ST.modal = { type:'settings' }; render(); }
+function handleLogoSett(input) { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{ST.logo=e.target.result;autoSave('logo','Logo salvo');render();}; r.readAsDataURL(f); }
+function saveSettings() { const u=document.getElementById('s-u')?.value.trim(); const p=document.getElementById('s-p')?.value; const pc=document.getElementById('s-c')?.value; if(!u){alert('Usuário obrigatório');return;} if(p&&p!==pc){alert('Senhas não conferem');return;} const cur=ls('igr-credentials')||{usuario:'admin',senha:'1234'}; ss('igr-credentials',{usuario:u,senha:p||cur.senha}); toast('Credenciais salvas!'); closeModal(); }
+function saveFinPin() { const p=document.getElementById('s-finpin')?.value; const pc=document.getElementById('s-finpinc')?.value; if(!p){toast('PIN mantido');closeModal();return;} if(p.length<4){alert('PIN deve ter ao menos 4 dígitos');return;} if(p!==pc){alert('PINs não conferem');return;} ss('igr-finpin',hashPin(p)); toast('PIN salvo!'); closeModal(); }
+function sf(k,v) { if (ST.modal?.form) ST.modal.form[k] = v; }
+function confirmExit() { if (confirm('Sair?')) { ST.loggedIn = false; ST.mode = 'login'; ST.finUnlocked = false; render(); } }
+function toast(msg) { const t=document.getElementById('toast'),m=document.getElementById('toast-msg'); if(!t)return; m.textContent=msg; t.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>t.classList.remove('show'),2400); }
+
+// INICIALIZA
+render();
+</script>
+</body>
+</html>
